@@ -1,0 +1,26 @@
+# requirements.txt
+
+# --- PyTorch CPU-Only ---
+# This special URL tells pip to find the CPU version of torch, which is much smaller.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+# ----------------------
+
+# --- Telegram Bot & Scheduler ---
+pyTelegramBotAPI
+apscheduler
+
+# --- API & Services ---
+fastapi
+uvicorn
+requests
+python-dotenv
+beautifulsoup4
+lxml
+
+# --- AI & Transformers ---
+transformers
+sentencepiece
+
+
+playwright

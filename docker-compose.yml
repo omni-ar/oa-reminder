@@ -1,0 +1,38 @@
+# docker-compose.yml
+version: '3.7'
+
+services:
+  # Your Python FastAPI Service
+  api:
+    container_name: oa_api_service
+    build: .  # This tells Docker to build the image from the Dockerfile in this directory
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # Mounts your project code into the container for live updates
+    env_file:
+      - .env    # Loads your .env file
+    networks:
+      - oa-network
+    restart: unless-stopped
+
+  # The n8n Service
+  n8n:
+    container_name: n8n_service
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+      - DB_SQLITE_POOL_SIZE=3
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+    volumes:
+      - ~/.n8n:/home/node/.n8n
+    networks:
+      - oa-network
+    restart: unless-stopped
+
+# The network that allows services to communicate
+networks:
+  oa-network:
