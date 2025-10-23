@@ -1,44 +1,58 @@
 import telebot
-from apscheduler.schedulers.background import BackgroundScheduler
-from config import BOT_TOKEN, CHAT_ID
-from services.problem_fetcher import fetch_problems, fetch_problem_details, load_cache
-from services.situational_gen import generate_situational_question
+import requests # <-- Added for HTTP requests
 import re
-from services.evaluator import evaluate_solution
+import os # <-- Added to get environment variable
+
+# --- Updated Config Import ---
+# Assuming BOT_TOKEN, CHAT_ID, and N8N_EVALUATION_WEBHOOK_URL are in config.py or loaded via dotenv
+from config import BOT_TOKEN, CHAT_ID, N8N_EVALUATION_WEBHOOK_URL
+# --- Make sure N8N_EVALUATION_WEBHOOK_URL is defined in your config or .env ---
+if not N8N_EVALUATION_WEBHOOK_URL:
+    raise ValueError("N8N_EVALUATION_WEBHOOK_URL not found in environment/config")
+# -----------------------------
+
+from services.problem_fetcher import fetch_problems, fetch_problem_details, load_cache
+from services.situational_gen import generate_situational_question_legacy # Using legacy for simplicity here
+# --- Removed evaluate_solution import as it's no longer called directly ---
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Command: /start
+# Command: /start (No change)
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.reply_to(message, "👋 Hey Arjit! I'll remind you daily at 9 PM with new OA problems!")
+    bot.reply_to(message, "👋 Hey Arjit! Use /question to get problems and 'solution qX ...' to submit.")
 
-# Command: /question
+# Command: /question (Simplified for interactive use - uses legacy situational)
 @bot.message_handler(commands=["question"])
 def send_question(message):
-    problems = fetch_problems()
-    situational = generate_situational_question()
-    text = "📘 Today's Practice Problems:\n\n"
+    try:
+        # Use fetch_mixed_problems if available and desired, else fallback
+        # For simplicity, using fetch_problems (Codeforces only) here
+        problems = fetch_problems(count=2)
+        situational = generate_situational_question_legacy() # Get just the string
+        text = "📘 Today's Practice Problems:\n\n"
 
-    for i, p in enumerate(problems, 1):
-        details = fetch_problem_details(p["contestId"], p["index"])
-        text += f"Q{i}: {p['name']} (⭐ {p['rating']})\n🔗 {p['link']}\n\n"
-        if "error" not in details:
-            text += f"📖 Statement:\n{details['statement'][:500]}...\n"
-            if details["samples"]:
-                sample = details["samples"][0]
-                text += f"📝 Sample Input:\n{sample['input']}\n📤 Sample Output:\n{sample['output']}\n\n"
-            text += f"💻 Signature: {details['signature']}\n\n"
+        if not problems:
+            text += "⚠️ Couldn't fetch coding problems right now. Try again later.\n\n"
+        else:
+            for i, p in enumerate(problems, 1):
+                platform = f"[{p.get('platform', 'codeforces').upper()}] "
+                rating_or_diff = f"(⭐ {p.get('rating')})" if p.get('rating') else f"(⭐ {p.get('difficulty')})"
+                text += f"Q{i}: {platform}{p.get('name', 'Unknown')} {rating_or_diff}\n🔗 {p.get('link', 'N/A')}\n\n"
 
-    text += f"Q3 (Situational):\n{situational}\n"
-    bot.send_message(message.chat.id, text)
+        text += f"Q{len(problems) + 1} (Situational):\n{situational}\n"
+        bot.send_message(message.chat.id, text, disable_web_page_preview=True)
+    except Exception as e:
+        print(f"Error in /question: {e}")
+        bot.reply_to(message, "😥 Sorry, couldn't fetch questions right now.")
 
-# Command: /details q1|q2
+
+# Command: /details qX (No change needed for core logic, handles CF only currently)
 @bot.message_handler(commands=["details"])
 def send_details(message):
     parts = message.text.strip().split()
-    if len(parts) != 2 or parts[1].lower() not in ("q1", "q2"):
-        bot.reply_to(message, "Usage: /details q1 OR /details q2")
+    if len(parts) != 2 or parts[1].lower() not in ("q1", "q2", "q3", "q4"): # Allow more qkeys potentially
+        bot.reply_to(message, "Usage: /details q1 (or q2, q3...)")
         return
 
     qkey = parts[1].lower()
@@ -49,99 +63,129 @@ def send_details(message):
         return
 
     prob = last[qkey]
-    details = fetch_problem_details(prob["contestId"], prob["index"])
-    if "error" in details:
-        bot.reply_to(message, f"⚠️ Could not fetch details: {details['error']}")
-        return
+    
+    # --- Simplified details fetching - only works well for Codeforces ---
+    if prob.get("platform") == "codeforces":
+        details = fetch_problem_details(prob["contestId"], prob["index"])
+        if "error" in details:
+            bot.reply_to(message, f"⚠️ Could not fetch details: {details['error']}")
+            return
 
-    text = f"📘 Full Details for {qkey.upper()} — {prob['name']} (⭐ {prob['rating']})\n\n"
-    text += f"🔗 {prob['link']}\n\n"
-    text += f"📖 Statement:\n{details['statement']}\n\n"
-    if details["constraints"]:
-        text += f"⚙️ Constraints:\n{details['constraints']}\n\n"
-
-    if details["samples"]:
-        for i, s in enumerate(details["samples"], start=1):
-            text += f"📝 Sample Input {i}:\n{s['input']}\n\n"
-            text += f"📤 Sample Output {i}:\n{s['output']}\n\n"
-
-    text += f"💻 Suggested Function Signature:\n{details['signature']}\n\n"
+        text = f"📘 Full Details for {qkey.upper()} — {prob['name']} (⭐ {prob['rating']})\n\n"
+        text += f"🔗 {prob['link']}\n\n"
+        text += f"📖 Statement:\n{details.get('statement', 'Not available')}\n\n"
+        if details.get('constraints'):
+            text += f"⚙️ Constraints:\n{details['constraints']}\n\n"
+        if details.get('samples'):
+            for i, s in enumerate(details['samples'], start=1):
+                text += f"📝 Sample Input {i}:\n```\n{s.get('input', '')}\n```\n\n"
+                text += f"📤 Sample Output {i}:\n```\n{s.get('output', '')}\n```\n\n"
+        # --- End CF details ---
+    elif prob.get("platform") == "leetcode":
+         text = f"📘 Details for LeetCode {qkey.upper()} — {prob['name']} ({prob['difficulty']})\n\n"
+         text += f"🔗 {prob['link']}\n\n"
+         text += "ℹ️ Full details, constraints, and examples are best viewed on the LeetCode website."
+    else:
+        text = f"Details for {qkey.upper()} ({prob.get('name', 'Unknown')}) are not available in this format."
 
     # Split into chunks for Telegram limit
-    for chunk in [text[i:i+3500] for i in range(0, len(text), 3500)]:
-        bot.send_message(message.chat.id, chunk)
+    for chunk in [text[i:i+4000] for i in range(0, len(text), 4000)]:
+        try:
+            bot.send_message(message.chat.id, chunk, parse_mode='Markdown', disable_web_page_preview=True)
+        except Exception as e:
+             print(f"Error sending details chunk: {e}")
+             # Fallback sending without Markdown if formatting fails
+             try:
+                 bot.send_message(message.chat.id, chunk, disable_web_page_preview=True)
+             except Exception as e2:
+                 print(f"Fallback send failed: {e2}")
 
-# Daily Reminder
-def daily_reminder():
-    problems = fetch_problems()
-    situational = generate_situational_question()
-    text = "⏰ Daily OA Reminder (9 PM)!\n\n"
-    for i, p in enumerate(problems, 1):
-        details = fetch_problem_details(p["contestId"], p["index"])
-        text += f"Q{i}: {p['name']} (⭐ {p['rating']})\n🔗 {p['link']}\n\n"
-        if "error" not in details:
-            text += f"📖 {details['statement'][:500]}...\n\n"
-    text += f"Q3 (Situational):\n{situational}\n"
-    bot.send_message(CHAT_ID, text)
+# --- Removed Daily Reminder & Scheduler ---
+# This functionality is handled by the n8n workflow when running the docker-compose setup.
+# Keeping it here would cause duplicate messages if both bot.py and n8n are running.
 
-# Scheduler
-scheduler = BackgroundScheduler()
-scheduler.add_job(daily_reminder, "cron", hour=21, minute=0)  # 9:00 PM IST
-scheduler.start()
-
-# Solution Handler
+# --- UPDATED Solution Handler ---
 @bot.message_handler(func=lambda m: m.text and m.text.lower().startswith("solution "))
 def handle_solution(message):
     """
-    Expected:
-    solution q1
-    <cpp code>
+    Parses the solution message and sends it to the n8n webhook for evaluation.
     """
     text = message.text
+    chat_id = message.chat.id
     lines = text.splitlines()
-    if not lines:
-        bot.reply_to(message, "Send as:\nsolution q1\n<your C++ code>")
+
+    if len(lines) < 2:
+        bot.reply_to(message, "❌ Invalid format. Send as:\nsolution qX [language]\n<code>")
         return
 
-    # First line like: "solution q1" or "solution q2"
-    first = lines[0].strip().lower()
-    m = re.match(r"solution\s+(q1|q2)\s*$", first)
-    if not m:
-        bot.reply_to(message, "Use 'solution q1' or 'solution q2' on the first line, then paste your C++ code.")
+    # Parse first line: "solution qX [language]" (language is optional, defaults to cpp)
+    first_line_parts = lines[0].strip().lower().split()
+    qkey = None
+    language = "cpp" # Default language
+
+    if len(first_line_parts) >= 2:
+        if re.match(r"q[1-4]$", first_line_parts[1]):
+             qkey = first_line_parts[1]
+    if len(first_line_parts) >= 3:
+        # Very basic language check, can be improved
+        if first_line_parts[2] in ["python", "py", "java", "c++", "cpp", "cxx"]:
+             language = first_line_parts[2]
+             if language in ["py", "python3"]: language = "python"
+             if language in ["c++", "cxx", "cc"]: language = "cpp"
+
+    if not qkey:
+        bot.reply_to(message, "❌ Invalid format. Use 'solution qX [language]' on the first line (e.g., solution q1 cpp).")
         return
 
-    qkey = m.group(1)
     code = "\n".join(lines[1:]).strip()
     if not code:
-        bot.reply_to(message, "Please paste your C++ code after the first line.")
+        bot.reply_to(message, "❌ Please paste your code after the first line.")
         return
 
+    # Send immediate feedback to the user
+    bot.reply_to(message, f"✅ Got it! Evaluating your {language} solution for {qkey.upper()}...")
     bot.send_chat_action(message.chat.id, "typing")
-    result = evaluate_solution(qkey=qkey, language="cpp", code=code)
 
-    if not result.get("ok"):
-        err = result.get("error") or result.get("compile_error") or "Unknown error"
-        bot.reply_to(message, f"❌ Evaluation failed:\n{err}")
-        return
+    # Prepare data payload for n8n webhook
+    payload = {
+        "qkey": qkey,
+        "language": language,
+        "code": code, # Send the raw code
+        "chat_id": chat_id
+    }
 
-    # Build response
-    resp = [f"🧪 Evaluation for {qkey.upper()} — {result['problem']['name']}"]
-    resp.append(result["summary"])
+    # Send the request to the n8n webhook
+    try:
+        response = requests.post(N8N_EVALUATION_WEBHOOK_URL, json=payload, timeout=10) # 10 second timeout
+        response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
 
-    for r in result["results"]:
-        if r.get("ok"):
-            resp.append(f"✅ Case {r['case']}")
-        elif r.get("timeout"):
-            resp.append(f"⏳ Case {r['case']}: Timed out")
+        # Check n8n's response (optional, but good for debugging)
+        n8n_response = response.json()
+        if n8n_response.get("message") == "Workflow was started":
+            print(f"Successfully triggered n8n workflow for {qkey} from chat {chat_id}")
         else:
-            exp = r['expected'].strip().replace("\r", "")
-            got = r['got'].strip().replace("\r", "")
-            resp.append(f"❌ Case {r['case']}:\nExpected:\n{exp[:300]}\nGot:\n{got[:300]}")
+            print(f"Unexpected response from n8n: {n8n_response}")
+            # Don't send an error to user here, as evaluation might still be running
 
-    bot.reply_to(message, "\n\n".join(resp))
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error calling n8n webhook: {e}")
+        # Notify user that the submission failed
+        bot.send_message(chat_id, f"😥 Sorry, couldn't submit your solution for evaluation right now. Please try again later.\nError: {e}")
+    except Exception as e:
+        print(f"❌ Unexpected error in handle_solution: {e}")
+        bot.send_message(chat_id, "😥 An unexpected error occurred while submitting your solution.")
+
+    # --- IMPORTANT: No response building here ---
+    # The n8n workflow is responsible for sending the final evaluation result back to the user.
+
+# --- End UPDATED Solution Handler ---
 
 print("🤖 Bot is running...")
 try:
+    # Use polling (simple for local testing)
     bot.polling(none_stop=True)
+except Exception as e:
+    print(f"Bot polling error: {e}")
 finally:
-    scheduler.shutdown()
+    # No scheduler to shutdown now
+    print("Bot stopped.")

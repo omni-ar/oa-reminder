@@ -1,10 +1,5 @@
 {
   "situational_history": [
-    "What is the most important factor in a software engineer's career?",
-    "What is a good example of a problem that a software engineer can solve?",
-    "What is the most important thing a software engineer needs to know about a system?",
-    "What is the most important question a software engineer would ask?",
-    "What is the most important component of a software engineer's job?",
     "What is a good way to get a job as a software engineer?",
     "What is the most important aspect of a software engineer's job?",
     "What is the most important part of a software engineer's job?",
@@ -15,7 +10,31 @@
     "What is a good example of a problem that a software engineer would like to solve?",
     "What is a behavioral/situational question for a software engineer?",
     "What is the most important thing that a software engineer needs to know about a system design?",
-    "What is a good example of a problem that a software engineer might be able to solve?"
+    "What is a good example of a problem that a software engineer might be able to solve?",
+    "What is the most important task for a software engineer?",
+    "What is the most common type of interview for a software engineer?",
+    "What is the most important question that a software engineer would ask?",
+    "What does a software engineer need to know about a system design?",
+    "What is a good example of a problem that a software engineer is faced with?",
+    "It must be a direct question to the candidate, not a question about interviews.?",
+    "An SQL query scanning 10M rows takes 30 seconds. How do you optimize it?",
+    "It must be a direct question to the candidate, not a meta-questions.?",
+    "What is a good question to ask a senior software engineer for an e-commerce platform?",
+    "How do you optimize the build time for an e-commerce platform?",
+    "How would you design a video streaming service like YouTube?",
+    "What is the most important thing that a candidate should know about a system design?",
+    "How would you build a rate limiter for an API gateway processing 100K req/s?",
+    "How would you architect a real-time chat system for 10M concurrent users?",
+    "What is the best way to ask a direct question to the candidate?",
+    "How would you architect a distributed job scheduler processing 1M tasks daily?",
+    "How would you design a distributed cache with automatic failover and data replication?",
+    "Design a search autocomplete system for 1M products with sub-100ms latency.",
+    "How would you build a scalable e-commerce platform handling Black Friday traffic?",
+    "Design a URL shortener handling 1000 requests/second with 99.9% uptime.",
+    "What is the most important design feature for a fin-tech system?",
+    "How would you design a ride-sharing system like Uber with real-time location tracking.?",
+    "How would you design a URL shortener handling 1000 requests/second with 99.9% uptime?",
+    "Design a ride-sharing system like Uber with real-time location tracking."
   ],
   "used_problems": [
     "188G",
@@ -91,22 +110,142 @@
     "318B",
     "1558A",
     "523B",
-    "903B"
+    "903B",
+    "2065D",
+    "373B",
+    "663A",
+    "1856E1",
+    "873B",
+    "1334D",
+    "670D1",
+    "1370C",
+    "54A",
+    "1721C",
+    "cf_879B",
+    "cf_1985G",
+    "cf_1169B",
+    "cf_1874A",
+    "cf_1307C",
+    "cf_1119C",
+    "cf_1733D1",
+    "cf_2025D",
+    "cf_931C",
+    "cf_1437B",
+    "cf_630F",
+    "cf_1283C",
+    "cf_1527B1",
+    "lc_167",
+    "cf_1389C",
+    "lc_764",
+    "cf_1846E1",
+    "lc_477",
+    "cf_534C",
+    "lc_449",
+    "cf_706D",
+    "lc_324",
+    "cf_1032B",
+    "lc_672",
+    "cf_163A",
+    "lc_300",
+    "cf_1062B",
+    "lc_905",
+    "cf_989C",
+    "lc_287",
+    "cf_1326D2",
+    "lc_151",
+    "cf_1693A",
+    "lc_210",
+    "cf_1054C",
+    "lc_881",
+    "cf_1722E",
+    "lc_319"
   ],
   "last_selection": {
     "q1": {
-      "name": "Mean Requests",
-      "rating": 1500,
-      "link": "https://codeforces.com/problemset/problem/523/B",
-      "contestId": 523,
-      "index": "B"
+      "name": "Bulb Switcher",
+      "difficulty": "Medium",
+      "link": "https://leetcode.com/problems/bulb-switcher/",
+      "questionId": "319",
+      "titleSlug": "bulb-switcher",
+      "platform": "leetcode"
     },
     "q2": {
-      "name": "The Modcrab",
-      "rating": 1200,
-      "link": "https://codeforces.com/problemset/problem/903/B",
-      "contestId": 903,
-      "index": "B"
+      "name": "Counting Rectangles",
+      "rating": 1600,
+      "link": "https://codeforces.com/problemset/problem/1722/E",
+      "contestId": 1722,
+      "index": "E",
+      "platform": "codeforces"
     }
+  },
+  "codeforces_cache": {},
+  "leetcode_cache": {},
+  "sample_cache": {
+    "lc_two-sum-ii-input-array-is-sorted": [
+      [
+        "[2,7,11,15]",
+        "9"
+      ],
+      [
+        "[2,3,4]",
+        "6"
+      ],
+      [
+        "[-1,0]",
+        "-1"
+      ]
+    ],
+    "https://codeforces.com/problemset/problem/1846/E1": [
+      [
+        "912361315255101011000000",
+        "NO\nNO\nNO\nNO\nYES\nYES\nYES\nYES\nNO"
+      ]
+    ],
+    "lc_total-hamming-distance": [
+      [
+        "[4,14,2]",
+        "[4,14,4]"
+      ]
+    ],
+    "https://codeforces.com/problemset/problem/534/C": [
+      [
+        "2 8\n4 4",
+        "3 3"
+      ],
+      [
+        "1 3\n5",
+        "4"
+      ],
+      [
+        "2 3\n2 3",
+        "0 1"
+      ]
+    ],
+    "lc_serialize-and-deserialize-bst": [
+      [
+        "[2,1,3]",
+        "[]"
+      ]
+    ],
+    "lc_reverse-words-in-a-string": [
+      [
+        "\"the sky is blue\"",
+        "\"  hello world  \""
+      ]
+    ],
+    "https://codeforces.com/problemset/problem/1054/C": [
+      [
+        "5\n0 0 1 1 2\n2 0 1 0 0",
+        "YES\n1 3 1 2 1"
+      ],
+      [
+        "4\n0 0 2 0\n1 1 1 1",
+        "NO"
+      ],
+      [
+        "3\n0 0 0\n0 0 0",
+        "YES\n1 1 1"
+      ]
+    ]
   }
 }
