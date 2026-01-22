@@ -34,7 +34,8 @@
     "What is the most important design feature for a fin-tech system?",
     "How would you design a ride-sharing system like Uber with real-time location tracking.?",
     "How would you design a URL shortener handling 1000 requests/second with 99.9% uptime?",
-    "Design a ride-sharing system like Uber with real-time location tracking."
+    "Design a ride-sharing system like Uber with real-time location tracking.",
+    "How do you fix a memory usage problem?"
   ],
   "used_problems": [
     "188G",
@@ -158,23 +159,25 @@
     "cf_1054C",
     "lc_881",
     "cf_1722E",
-    "lc_319"
+    "lc_319",
+    "cf_551B",
+    "lc_36"
   ],
   "last_selection": {
     "q1": {
-      "name": "Bulb Switcher",
+      "name": "Valid Sudoku",
       "difficulty": "Medium",
-      "link": "https://leetcode.com/problems/bulb-switcher/",
-      "questionId": "319",
-      "titleSlug": "bulb-switcher",
+      "link": "https://leetcode.com/problems/valid-sudoku/",
+      "questionId": "36",
+      "titleSlug": "valid-sudoku",
       "platform": "leetcode"
     },
     "q2": {
-      "name": "Counting Rectangles",
-      "rating": 1600,
-      "link": "https://codeforces.com/problemset/problem/1722/E",
-      "contestId": 1722,
-      "index": "E",
+      "name": "ZgukistringZ",
+      "rating": 1800,
+      "link": "https://codeforces.com/problemset/problem/551/B",
+      "contestId": 551,
+      "index": "B",
       "platform": "codeforces"
     }
   },

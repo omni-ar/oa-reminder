@@ -7,6 +7,7 @@ __pycache__/
 
 # Ignore the sensitive environment file
 .env
+oa-reminder-key.pem
 
 # Ignore VSCode settings
 .vscode/
