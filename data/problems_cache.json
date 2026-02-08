@@ -35,7 +35,13 @@
     "How would you design a ride-sharing system like Uber with real-time location tracking.?",
     "How would you design a URL shortener handling 1000 requests/second with 99.9% uptime?",
     "Design a ride-sharing system like Uber with real-time location tracking.",
-    "How do you fix a memory usage problem?"
+    "How do you fix a memory usage problem?",
+    "Tell me about a time you had to debug a critical issue under extreme pressure.",
+    "Describe a situation where you had to learn a new technology very quickly.",
+    "Which of the following is not a trait of a professional: communication skills, engineering skills, or technical expertise?",
+    "What is the most important attribute of a candidate?",
+    "What does a candidate need to know about streaming services?",
+    "How did you develop the problem?"
   ],
   "used_problems": [
     "188G",
@@ -161,24 +167,38 @@
     "cf_1722E",
     "lc_319",
     "cf_551B",
-    "lc_36"
+    "lc_36",
+    "cf_1893B",
+    "lc_554",
+    "cf_917B",
+    "lc_834",
+    "cf_1475E",
+    "lc_652",
+    "cf_887B",
+    "lc_148",
+    "cf_1133F1",
+    "lc_929",
+    "cf_174C",
+    "lc_337",
+    "cf_727B",
+    "lc_553"
   ],
   "last_selection": {
     "q1": {
-      "name": "Valid Sudoku",
-      "difficulty": "Medium",
-      "link": "https://leetcode.com/problems/valid-sudoku/",
-      "questionId": "36",
-      "titleSlug": "valid-sudoku",
-      "platform": "leetcode"
-    },
-    "q2": {
-      "name": "ZgukistringZ",
-      "rating": 1800,
-      "link": "https://codeforces.com/problemset/problem/551/B",
-      "contestId": 551,
+      "name": "Bill Total Value",
+      "rating": 1600,
+      "link": "https://codeforces.com/problemset/problem/727/B",
+      "contestId": 727,
       "index": "B",
       "platform": "codeforces"
+    },
+    "q2": {
+      "name": "Optimal Division",
+      "difficulty": "Medium",
+      "link": "https://leetcode.com/problems/optimal-division/",
+      "questionId": "553",
+      "titleSlug": "optimal-division",
+      "platform": "leetcode"
     }
   },
   "codeforces_cache": {},

@@ -4,27 +4,53 @@ import json
 import os
 from datetime import datetime
 from transformers import pipeline
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import torch
 
 CACHE_FILE = "./data/problems_cache.json"
 os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
 
 generator = None
+model = None
+tokenizer = None
 
 def get_generator():
-    """Initialize the model on first call and reuse it."""
-    global generator
+    """Load T5 model explicitly for text generation."""
+    global generator, model, tokenizer
+    
     if generator is None:
-        print("💡 Loading situational question generator model...")
+        print("💡 Loading Flan-T5 model for interview questions...")
         try:
-            generator = pipeline(
-                "text2text-generation",
-                model="google/flan-t5-base",
-                device=-1  # CPU only
+            model_name = "google/flan-t5-base"
+            
+            # Load model and tokenizer manually
+            tokenizer = T5Tokenizer.from_pretrained(model_name)
+            model = T5ForConditionalGeneration.from_pretrained(
+                model_name,
+                torch_dtype=torch.float32,
+                low_cpu_mem_usage=True
             )
-            print("✅ Model loaded successfully.")
+            
+            # Wrapper function to act like a generator
+            def generate_text(prompt, max_length=150):
+                inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
+                outputs = model.generate(
+                    **inputs,
+                    max_length=max_length,
+                    do_sample=True,
+                    temperature=0.8,
+                    top_p=0.9,
+                    num_return_sequences=1
+                )
+                return tokenizer.decode(outputs[0], skip_special_tokens=True)
+            
+            generator = generate_text
+            print("✅ Flan-T5 model loaded successfully.")
+            
         except Exception as e:
-            print(f"⚠️ Could not load transformers model: {e}")
-            # Keep generator as None to allow fallback
+            print(f"⚠️ Flan-T5 load failed: {e}")
+            generator = None
+    
     return generator
 
 # Enhanced question bank with multiple categories
@@ -176,7 +202,6 @@ def generate_ai_question_with_context():
         contexts = ["for an e-commerce platform", "for a social media app", "for a fin-tech system", "for a streaming service"]
         context = contexts[day_of_year % len(contexts)]
         
-        # --- THIS IS THE NEW, MORE DIRECT PROMPT ---
         prompt = (
             f"Act as a senior software engineer conducting an interview. Your task is to ASK a challenging "
             f"{category.replace('_', ' ')} question related to {context}.\n\n"
@@ -187,11 +212,11 @@ def generate_ai_question_with_context():
             f"3. The question MUST be under 35 words and end with a question mark.\n\n"
             f"Ask the question now:"
         )
-        # ---------------------------------------------
         
-        result = gen(prompt, max_new_tokens=120, do_sample=True, temperature=0.9)
+        # ✅ FIXED: gen() now returns string directly
+        text = gen(prompt, max_length=100)
+        text = text.strip().replace("Question:", "").strip()
         
-        text = result[0]["generated_text"].strip().replace("Question:", "").strip()
         if not text.endswith("?"):
             text += "?"
             
