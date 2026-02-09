@@ -14,5 +14,5 @@ USER node
 # Expose port
 EXPOSE 5678
 
-# FIXED: Use full path to n8n
-CMD ["node", "/usr/local/bin/n8n"]
+# Run n8n directly (it's already an executable)
+CMD ["n8n"]
