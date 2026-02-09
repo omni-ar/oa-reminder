@@ -1,7 +1,13 @@
 # .dockerignore
 
-venv
-__pycache__
-.git
-.vscode
+venv/
+__pycache__/
 *.pyc
+.env
+oa-reminder-key.pem
+.vscode/
+.git/
+data/problems_cache.json
+submissions/
+*.log
+.DS_Store

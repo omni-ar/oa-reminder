@@ -1,0 +1,24 @@
+# Dockerfile.n8n
+FROM n8nio/n8n:latest
+
+USER root
+
+# Set timezone
+ENV GENERIC_TIMEZONE=Asia/Kolkata
+ENV TZ=Asia/Kolkata
+
+# Configure n8n
+ENV N8N_ENCRYPTION_KEY=your-random-encryption-key-here
+ENV N8N_USER_MANAGEMENT_DISABLED=true
+ENV N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false
+ENV DB_SQLITE_POOL_SIZE=3
+ENV N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+ENV EXECUTIONS_TIMEOUT=600
+ENV EXECUTIONS_TIMEOUT_MAX=1200
+ENV WEBHOOK_URL=https://YOUR_N8N_URL.onrender.com
+
+USER node
+
+WORKDIR /home/node/.n8n
+
+CMD ["n8n", "start"]

@@ -3,14 +3,12 @@
 # Start with an official Python base image
 FROM python:3.11-slim
 
-# --- ADD THIS BLOCK ---
 # Install system dependencies:
 # g++ for C++ compilation
 # openjdk-17-jdk for Java compilation/runtime
 RUN apt-get update && \
     apt-get install -y build-essential default-jdk --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
-# -------------------
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -21,10 +19,15 @@ COPY requirements.txt .
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- ADD THIS LINE ---
 # Install Playwright browsers (needed if Playwright is used)
 RUN playwright install --with-deps chromium
-# -------------------
+
+# PRE-DOWNLOAD AI MODEL (ADD THIS BLOCK)
+RUN python -c "from transformers import T5Tokenizer, T5ForConditionalGeneration; \
+    print('Downloading Flan-T5 model...'); \
+    T5Tokenizer.from_pretrained('google/flan-t5-base'); \
+    T5ForConditionalGeneration.from_pretrained('google/flan-t5-base'); \
+    print('Model cached successfully!')"
 
 # Copy the rest of your application's code into the container
 COPY . .

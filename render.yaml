@@ -1,0 +1,46 @@
+services:
+  # Service 1: FastAPI Backend
+  - type: web
+    name: oa-reminder-api
+    runtime: docker
+    region: oregon
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
+      - key: HF_API_KEY
+        sync: false
+      - key: N8N_WEBHOOK_URL
+        value: https://oa-reminder-n8n.onrender.com/webhook/evaluate
+
+  # Service 2: n8n Workflows
+  - type: web
+    name: oa-reminder-n8n
+    runtime: docker
+    region: oregon
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile.n8n
+    envVars:
+      - key: N8N_ENCRYPTION_KEY
+        generateValue: true
+      - key: N8N_USER_MANAGEMENT_DISABLED
+        value: "true"
+      - key: GENERIC_TIMEZONE
+        value: Asia/Kolkata
+      - key: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+        value: "false"
+      - key: EXECUTIONS_TIMEOUT
+        value: "600"
+      - key: EXECUTIONS_TIMEOUT_MAX
+        value: "1200"
+      - key: N8N_PORT
+        value: "10000"
+      - key: N8N_HOST
+        value: "0.0.0.0"
+      - key: WEBHOOK_URL
+        sync: false
